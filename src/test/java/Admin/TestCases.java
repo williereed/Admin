@@ -5,195 +5,216 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.support.ui.Select;
 import java.util.concurrent.TimeUnit;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertNotSame;
 
 public class TestCases {
     //private String AdminURL = "https://52.151.17.83/admin/";
     private String AdminURL = "https://localhost:8081";
-    private boolean verboseMessages = false;                   // true will write each action to the console
+    private boolean verboseMessages = false;        // true will write each action to the console
     private int secondsToTimeout = 2;
     private int numberRetriesFindElement = 2;
-    private int SleepForSave = 2000;                // wait after clicking Sleep
+    private int SleepForSave = 2000;                // wait after clicking Save
     private int NormalSleepTime = 500;              // increases reliability
+    private int NumberOfChangesToDiscard = 10;
+    private int NumberOfRulesToAdd = 11;
     private enum Browser {CHROME, FIREFOX, IE, EDGE};
     private enum LocateType {ID, NAME, LINK_TEXT, CSS_SELECTOR, CLASS_NAME, XPATH};
     private enum Rules {USERAGENT, XCARMODEL, XMARKET, XNTGVERION, XSSID, XVIN};
     private enum Environments {DEVELOPMENT, TEST, PRODUCTION}
     private boolean runChrome = true;               // true will runs Chrome cases, false reports Pass without running
-    private boolean runFirefox = true;              //                Firefox
+    private boolean runFirefox = false;              //                Firefox
     private boolean runIE = true;                   //                Internet Explorer (not running on Win10)
     private boolean runEdge = true;                 //                Edge (only running on Win10)
 
     @Test
+    public void Chrome_DiscardChanges() {
+        if (runChrome)
+            DiscardChanges(Browser.CHROME);
+    }
+
+    @Test
+    public void Chrome_AddMultipleRules() {
+        if (runChrome)
+            AddMultipleRules(Browser.CHROME);
+    }
+
+    @Test
     public void Chrome_AddRemove_UserAgent_Development() {
         if (runChrome)
-            RunCase(Browser.CHROME, Rules.USERAGENT, Environments.DEVELOPMENT);
+            AddRemove(Browser.CHROME, Rules.USERAGENT, Environments.DEVELOPMENT);
     }
 
     @Test
     public void Chrome_AddRemove_XCarModel_Development() {
         if (runChrome)
-            RunCase(Browser.CHROME, Rules.XCARMODEL, Environments.DEVELOPMENT);
+            AddRemove(Browser.CHROME, Rules.XCARMODEL, Environments.DEVELOPMENT);
     }
 
     @Test
     public void Chrome_AddRemove_XMarket_Development() {
         if (runChrome)
-            RunCase(Browser.CHROME, Rules.XMARKET, Environments.DEVELOPMENT);
+            AddRemove(Browser.CHROME, Rules.XMARKET, Environments.DEVELOPMENT);
     }
 
     @Test
     public void Chrome_AddRemove_XNtgVersion_Development() {
         if (runChrome)
-            RunCase(Browser.CHROME, Rules.XNTGVERION, Environments.DEVELOPMENT);
+            AddRemove(Browser.CHROME, Rules.XNTGVERION, Environments.DEVELOPMENT);
     }
 
     @Test
     public void Chrome_AddRemove_XSSID_Development() {
         if (runChrome)
-            RunCase(Browser.CHROME, Rules.XSSID, Environments.DEVELOPMENT);
+            AddRemove(Browser.CHROME, Rules.XSSID, Environments.DEVELOPMENT);
     }
 
     @Test
     public void Chrome_AddRemove_XVIN_Development() {
         if (runChrome)
-            RunCase(Browser.CHROME, Rules.XVIN, Environments.DEVELOPMENT);
+            AddRemove(Browser.CHROME, Rules.XVIN, Environments.DEVELOPMENT);
     }
 
     @Test
     public void Chrome_AddRemove_UserAgent_Test() {
         if (runChrome)
-            RunCase(Browser.CHROME, Rules.USERAGENT, Environments.TEST);
+            AddRemove(Browser.CHROME, Rules.USERAGENT, Environments.TEST);
     }
 
     @Test
     public void Chrome_AddRemove_XCarModel_Test() {
         if (runChrome)
-            RunCase(Browser.CHROME, Rules.XCARMODEL, Environments.TEST);
+            AddRemove(Browser.CHROME, Rules.XCARMODEL, Environments.TEST);
     }
 
     @Test
     public void Chrome_AddRemove_XMarket_Test() {
         if (runChrome)
-            RunCase(Browser.CHROME, Rules.XMARKET, Environments.TEST);
+            AddRemove(Browser.CHROME, Rules.XMARKET, Environments.TEST);
     }
 
     @Test
     public void Chrome_AddRemove_XNtgVersion_Test() {
         if (runChrome)
-            RunCase(Browser.CHROME, Rules.XNTGVERION, Environments.TEST);
+            AddRemove(Browser.CHROME, Rules.XNTGVERION, Environments.TEST);
     }
 
     @Test
     public void Chrome_AddRemove_XSSID_Test() {
         if (runChrome)
-            RunCase(Browser.CHROME, Rules.XSSID, Environments.TEST);
+            AddRemove(Browser.CHROME, Rules.XSSID, Environments.TEST);
     }
 
     @Test
     public void Chrome_AddRemove_XVIN_Test() {
         if (runChrome)
-            RunCase(Browser.CHROME, Rules.XVIN, Environments.TEST);
+            AddRemove(Browser.CHROME, Rules.XVIN, Environments.TEST);
     }
 
-    @Test
-    public void Firefox_AddRemove_UserAgent_Development() {
-        if (runFirefox)
-            RunCase(Browser.FIREFOX, Rules.USERAGENT, Environments.DEVELOPMENT);
+    public void DiscardChanges (Browser browser) {
+        VerboseMessages("DiscardChanges " + browser);
+        WebDriver driver = BrowserFactory(browser);
+        try {
+            DeleteAllRules(driver);
+            int initialNumberOfRules = GetCountOfRules(driver);
+
+            CreateChanges(driver, NumberOfChangesToDiscard);
+
+            // Click the Discard Changes button
+            WebElement discardChanges = Locate(driver, LocateType.ID, "btn-reset", "Discard Changes Button");
+            for (int i = 0; i < 6; i++) {
+                discardChanges.click();
+                Sleep(NormalSleepTime);
+            }
+
+            // Verify a rule has been added using count of rules
+            int finalNumberOfRules = GetCountOfRules(driver);
+            assertEquals("Failed to Discard Changes, initial: " + initialNumberOfRules + " final: " +
+                    finalNumberOfRules, initialNumberOfRules, finalNumberOfRules);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        } finally {
+            Cleanup(driver);
+        }
     }
 
-    @Test
-    public void Firefox_AddRemove_XCarModel_Development() {
-        if (runFirefox)
-            RunCase(Browser.FIREFOX, Rules.XCARMODEL, Environments.DEVELOPMENT);
+    public void AddMultipleRules (Browser browser) {
+        VerboseMessages("AddMultipleRules " + browser);
+        WebDriver driver = BrowserFactory(browser);
+        try {
+            DeleteAllRules(driver);
+            CreateChanges(driver, NumberOfRulesToAdd);
+
+            // Click the Save button
+            WebElement save = Locate(driver, LocateType.ID, "btn-save", "Save Button");
+            save.click();
+            Sleep(NormalSleepTime);
+
+            // Verify a rule has been added using count of rules
+            int finalNumberOfRules = GetCountOfRules(driver);
+            assertEquals("Failed to Save rules, expected: " + NumberOfRulesToAdd + " actual: " +
+                    finalNumberOfRules, NumberOfRulesToAdd, finalNumberOfRules);
+        } catch (Exception ex) {
+            System.out.println(ex.getMessage());
+        } finally {
+            Cleanup(driver);
+        }
     }
 
-    @Test
-    public void Firefox_AddRemove_XMarket_Development() {
-        if (runFirefox)
-            RunCase(Browser.FIREFOX, Rules.XMARKET, Environments.DEVELOPMENT);
+    public void CreateChanges (WebDriver driver, int changes) {
+        WebElement inputRule = Locate(driver, LocateType.ID, "input-rule", "input-rule");
+        for (int i = 0; i < changes; i++) {
+            // Clear existing value
+            inputRule.clear();
+            Sleep(NormalSleepTime);
+            // Enter a value in Rule
+            inputRule.sendKeys(Integer.toString(i));
+            Sleep(NormalSleepTime);
+            // Click the Commit field
+            WebElement commitField = Locate(driver, LocateType.ID, "btn-add-rule", "btn-add-rule");
+            commitField.click();
+            Sleep(NormalSleepTime);
+        }
+
+        // TODO get verification working
+        // Verify Changes exist
+        //List<WebElement> rows = driver.findElements(By.xpath("//*[@id='table']"));
+        //int newNumberOfRules = rows.size();
+        //assertEquals("Failed to created Changes, actual: " + newNumberOfRules + " expected: " + changes,
+        //        newNumberOfRules, changes);
+
     }
 
-    @Test
-    public void Firefox_AddRemove_XNtgVersion_Development() {
-        if (runFirefox)
-            RunCase(Browser.FIREFOX, Rules.XNTGVERION, Environments.DEVELOPMENT);
-    }
-
-    @Test
-    public void Firefox_AddRemove_XSSID_Development() {
-        if (runFirefox)
-            RunCase(Browser.FIREFOX, Rules.XSSID, Environments.DEVELOPMENT);
-    }
-
-    @Test
-    public void Firefox_AddRemove_XVIN_Development() {
-        if (runFirefox)
-            RunCase(Browser.FIREFOX, Rules.XVIN, Environments.DEVELOPMENT);
-    }
-
-    @Test
-    public void Firefox_AddRemove_UserAgent_Test() {
-        if (runFirefox)
-            RunCase(Browser.FIREFOX, Rules.USERAGENT, Environments.TEST);
-    }
-
-    @Test
-    public void Firefox_AddRemove_XCarModel_Test() {
-        if (runFirefox)
-            RunCase(Browser.FIREFOX, Rules.XCARMODEL, Environments.TEST);
-    }
-
-    @Test
-    public void Firefox_AddRemove_XMarket_Test() {
-        if (runFirefox)
-            RunCase(Browser.FIREFOX, Rules.XMARKET, Environments.TEST);
-    }
-
-    @Test
-    public void Firefox_AddRemove_XNtgVersion_Test() {
-        if (runFirefox)
-            RunCase(Browser.FIREFOX, Rules.XNTGVERION, Environments.TEST);
-    }
-
-    @Test
-    public void Firefox_AddRemove_XSSID_Test() {
-        if (runFirefox)
-            RunCase(Browser.FIREFOX, Rules.XSSID, Environments.TEST);
-    }
-
-    @Test
-    public void Firefox_AddRemove_XVIN_Test() {
-        if (runFirefox)
-            RunCase(Browser.FIREFOX, Rules.XVIN, Environments.TEST);
-    }
-
-    public void RunCase(Browser browser, Rules rule, Environments environment) {
+    public void AddRemove(Browser browser, Rules rule, Environments environment) {
         VerboseMessages("RunCase " + browser + " " + rule + " " + environment);
         WebDriver driver = BrowserFactory(browser);
-        DeleteAllRules(driver);
-
-        // Add new rule
         try {
+            DeleteAllRules(driver);
+
+            // Add new rule
             Add_Rule(driver, rule, environment);
-        } catch (Exception ex){
-            System.out.println(ex.getMessage());
-        }
 
-        // Delete the rule
-        try {
+            // Delete the rule
             Remove_Rule(driver, 0);
-        }
-        catch (Exception ex){
+        } catch (Exception ex) {
             System.out.println(ex.getMessage());
+        } finally {
+            Cleanup(driver);
         }
+    }
 
-        driver.close();
+    private void Cleanup(WebDriver driver) {
+        if (driver != null) {
+            driver.close();
+            driver.quit();
+        }
     }
 
     private void Sleep(int milliSeconds) {
@@ -354,7 +375,11 @@ public class TestCases {
 
         switch (browser) {
             case CHROME:
-                driver = new ChromeDriver();
+                ChromeOptions chromeOpt = new ChromeOptions();
+                chromeOpt.addArguments("--log-level=3");
+                System.setProperty("webdriver.chrome.args", "--disable-logging");
+                System.setProperty("webdriver.chrome.silentOutput", "true");
+                driver = new ChromeDriver(chromeOpt);
                 break;
             case FIREFOX:
                 driver = new FirefoxDriver();
@@ -368,15 +393,20 @@ public class TestCases {
             default:
                 driver = new ChromeDriver();
         }
-        try {
-            driver.manage().window().maximize();
-        }
-        catch (Exception ex) {}
+        driver.manage().window().maximize();
         driver.manage().timeouts().implicitlyWait(secondsToTimeout, TimeUnit.SECONDS);
         driver.manage().timeouts().pageLoadTimeout(secondsToTimeout, TimeUnit.SECONDS);
         driver.manage().timeouts().setScriptTimeout(secondsToTimeout, TimeUnit.SECONDS);
-
         driver.navigate().to(AdminURL);
+        Sleep(NormalSleepTime);
+        String expectedTitleBarContains = "VIN-Router";
+        String actualTitleBar = driver.getTitle();
+        Boolean titleContainsVIN = actualTitleBar.contains(expectedTitleBarContains);
+        if (!titleContainsVIN) {
+            System.out.println("Failure VIN Router Admin Service is not running");
+            Cleanup(driver);
+            assertFalse("Failure VIN Router Admin Service is not running", true);
+        }
         return driver;
     }
 
