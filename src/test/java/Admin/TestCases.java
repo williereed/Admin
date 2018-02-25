@@ -27,7 +27,7 @@ public class TestCases {
     private int NumberOfRulesToAdd = 11;
     private enum Browser {CHROME, FIREFOX, IE, EDGE};
     private enum LocateType {ID, NAME, LINK_TEXT, CSS_SELECTOR, CLASS_NAME, XPATH};
-    private enum Rules {USERAGENT, XCARMODEL, XMARKET, XNTGVERION, XSSID, XVIN};
+    private enum Rules {USERAGENT, XCARMODEL, XMARKET, XNTGVERION, XSSIV, XVIN};
     private enum Environments {DEVELOPMENT, TEST, PRODUCTION}
     private boolean runChrome = true;               // true will runs Chrome cases, false reports Pass without running
     private boolean runFirefox = false;              //                Firefox
@@ -71,9 +71,9 @@ public class TestCases {
     }
 
     @Test
-    public void Chrome_AddRemove_XSSID_Development() {
+    public void Chrome_AddRemove_XSSIV_Development() {
         if (runChrome)
-            AddRemove(Browser.CHROME, Rules.XSSID, Environments.DEVELOPMENT);
+            AddRemove(Browser.CHROME, Rules.XSSIV, Environments.DEVELOPMENT);
     }
 
     @Test
@@ -107,9 +107,9 @@ public class TestCases {
     }
 
     @Test
-    public void Chrome_AddRemove_XSSID_Test() {
+    public void Chrome_AddRemove_XSSIV_Test() {
         if (runChrome)
-            AddRemove(Browser.CHROME, Rules.XSSID, Environments.TEST);
+            AddRemove(Browser.CHROME, Rules.XSSIV, Environments.TEST);
     }
 
     @Test
@@ -145,6 +145,14 @@ public class TestCases {
         }
     }
 
+    public void ClickSave(WebDriver driver) {
+        // Click the Save button
+        WebElement save = Locate(driver, LocateType.ID, "btn-save", "Save Button");
+        save.click();
+        Sleep(2000);
+        driver.navigate().refresh();
+    }
+
     public void AddMultipleRules (Browser browser) {
         VerboseMessages("AddMultipleRules " + browser);
         WebDriver driver = BrowserFactory(browser);
@@ -152,11 +160,7 @@ public class TestCases {
             DeleteAllRules(driver);
             CreateChanges(driver, NumberOfRulesToAdd);
 
-            // Click the Save button
-            WebElement save = Locate(driver, LocateType.ID, "btn-save", "Save Button");
-            save.click();
-            Sleep(NormalSleepTime);
-
+            ClickSave(driver);
             // Verify a rule has been added using count of rules
             int finalNumberOfRules = GetCountOfRules(driver);
             assertEquals("Failed to Save rules, expected: " + NumberOfRulesToAdd + " actual: " +
@@ -251,9 +255,9 @@ public class TestCases {
                 ruleValueToEnter = "x-ntg-version " + newRuleNumber;
                 ruleSelect.selectByVisibleText("X-NTG-VERSION");
                 break;
-            case XSSID:
-                ruleValueToEnter = "x-ssid " + newRuleNumber;
-                ruleSelect.selectByVisibleText("X-SSID");
+            case XSSIV:
+                ruleValueToEnter = "x-ssiv " + newRuleNumber;
+                ruleSelect.selectByVisibleText("X-SSIV");
                 break;
             case XVIN:
                 ruleValueToEnter = Integer.toString(newRuleNumber);
@@ -287,10 +291,7 @@ public class TestCases {
         commitField.click();
         Sleep(NormalSleepTime);
 
-        // Click the Save button
-        WebElement buttonSave = Locate(driver, LocateType.ID, "btn-save", "btn-save");
-        buttonSave.click();
-        Sleep(SleepForSave);
+        ClickSave(driver);
 
         // Verify a rule has been added using count of rules
         assertNotSame("Failed to add rule... count of rules did not increase. ", initialNumRules, GetCountOfRules(driver));
@@ -322,9 +323,7 @@ public class TestCases {
         removeRule.click();
         Sleep(NormalSleepTime);
 
-        WebElement saveButton = Locate(driver, LocateType.ID, "btn-save", "Save Button");
-        saveButton.click();
-        Sleep(SleepForSave);
+        ClickSave(driver);
 
         // Verify rule has been removed
         assertNotSame("Failed to remove rule, count of rules not changed ", initialNumRules, GetCountOfRules(driver));
@@ -393,6 +392,7 @@ public class TestCases {
             default:
                 driver = new ChromeDriver();
         }
+        Sleep(250);
         driver.manage().window().maximize();
         driver.manage().timeouts().implicitlyWait(secondsToTimeout, TimeUnit.SECONDS);
         driver.manage().timeouts().pageLoadTimeout(secondsToTimeout, TimeUnit.SECONDS);
