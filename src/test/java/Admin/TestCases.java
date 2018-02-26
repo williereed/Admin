@@ -19,18 +19,18 @@ public class TestCases {
     //private String AdminURL = "https://52.151.17.83/admin/";
     private String AdminURL = "https://localhost:8081";
     private boolean verboseMessages = false;        // true will write each action to the console
-    private int secondsToTimeout = 2;
+    private int secondsToTimeout = 5;
     private int numberRetriesFindElement = 2;
     private int SleepForSave = 2000;                // wait after clicking Save
     private int NormalSleepTime = 500;              // increases reliability
     private int NumberOfChangesToDiscard = 10;
-    private int NumberOfRulesToAdd = 1000;
+    private int NumberOfRulesToAdd = 10;
     private enum Browser {CHROME, FIREFOX, IE, EDGE};
     private enum LocateType {ID, NAME, LINK_TEXT, CSS_SELECTOR, CLASS_NAME, XPATH};
     private enum Rules {USERAGENT, XCARMODEL, XMARKET, XNTGVERION, XSSIV, XVIN};
     private enum Environments {DEVELOPMENT, TEST, PRODUCTION}
     private boolean runChrome = true;               // true will runs Chrome cases, false reports Pass without running
-    private boolean runFirefox = false;              //                Firefox
+    private boolean runFirefox = true;              //                Firefox
     private boolean runIE = true;                   //                Internet Explorer (not running on Win10)
     private boolean runEdge = true;                 //                Edge (only running on Win10)
 
@@ -186,7 +186,7 @@ public class TestCases {
         WebElement save = Locate(driver, LocateType.ID, "btn-save", "Save Button");
         save.click();
         Sleep(2000);
-        driver.navigate().refresh();
+        //driver.navigate().refresh();
     }
 
     public void AddMultipleRules (Browser browser) {
@@ -314,7 +314,10 @@ public class TestCases {
     private void Cleanup(WebDriver driver) {
         if (driver != null) {
             driver.close();
-            driver.quit();
+            try {
+                driver.quit();
+            }
+            catch (Exception ex) {}
         }
     }
 
@@ -420,6 +423,7 @@ public class TestCases {
         Sleep(NormalSleepTime);
 
         ClickSave(driver);
+        Sleep(SleepForSave);
 
         // Verify rule has been removed
         assertNotSame("Failed to remove rule, count of rules not changed ", initialNumRules, GetCountOfRules(driver));
@@ -483,6 +487,8 @@ public class TestCases {
                 driver = new ChromeDriver(chromeOpt);
                 break;
             case FIREFOX:
+                System.setProperty(FirefoxDriver.SystemProperty.DRIVER_USE_MARIONETTE, "true");
+                System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "FirefoxLog.txt");
                 driver = new FirefoxDriver();
                 break;
             case IE:

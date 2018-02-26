@@ -1,0 +1,12 @@
+1519637568463	geckodriver	INFO	geckodriver 0.19.1
+1519637568467	geckodriver	INFO	Listening on 127.0.0.1:10203
+1519637568941	mozrunner::runner	INFO	Running command: "/usr/lib/firefox/firefox" "-marionette" "-profile" "/tmp/rust_mozprofile.rHHK414qgOmX"
+1519637569591	Marionette	INFO	Enabled via --marionette
+1519637572205	Marionette	INFO	Listening on port 33787
+1519637572291	Marionette	WARN	TLS certificate errors will be ignored for this session
+JavaScript error: https://localhost:8081/js/stupidtable.js, line 7: ReferenceError: jQuery is not defined
+JavaScript error: https://localhost:8081/js/main.js, line 16: ReferenceError: $ is not defined
+1519637591594	addons.productaddons	WARN	Failed downloading XML, status: 0, reason: error
+1519637591600	addons.productaddons	WARN	Failed downloading via XHR, status: 0, reason: error
+[GFX1-]: Receive IPC close with reason=AbnormalShutdo[wCnh
+ild 8267, Chrome_ChildThread] WARNING: pipe error (3): Connection reset by peer: file /build/firefox-9j9NY8/firefox-58.0.2+build1/ipc/chromium/src/chrome/common/ipc_channel_posix.cc, line 353
