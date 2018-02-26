@@ -24,7 +24,7 @@ public class TestCases {
     private int SleepForSave = 2000;                // wait after clicking Save
     private int NormalSleepTime = 500;              // increases reliability
     private int NumberOfChangesToDiscard = 10;
-    private int NumberOfRulesToAdd = 11;
+    private int NumberOfRulesToAdd = 1000;
     private enum Browser {CHROME, FIREFOX, IE, EDGE};
     private enum LocateType {ID, NAME, LINK_TEXT, CSS_SELECTOR, CLASS_NAME, XPATH};
     private enum Rules {USERAGENT, XCARMODEL, XMARKET, XNTGVERION, XSSIV, XVIN};
@@ -118,6 +118,42 @@ public class TestCases {
             AddRemove(Browser.CHROME, Rules.XVIN, Environments.TEST);
     }
 
+    @Test
+    public void Chrome_AddRemove_UserAgent_Production() {
+        if (runChrome)
+            AddRemove(Browser.CHROME, Rules.USERAGENT, Environments.PRODUCTION);
+    }
+
+    @Test
+    public void Chrome_AddRemove_XCarModel_Production() {
+        if (runChrome)
+            AddRemove(Browser.CHROME, Rules.XCARMODEL, Environments.PRODUCTION);
+    }
+
+    @Test
+    public void Chrome_AddRemove_XMarket_Production() {
+        if (runChrome)
+            AddRemove(Browser.CHROME, Rules.XMARKET, Environments.PRODUCTION);
+    }
+
+    @Test
+    public void Chrome_AddRemove_XNtgVersion_Production() {
+        if (runChrome)
+            AddRemove(Browser.CHROME, Rules.XNTGVERION, Environments.PRODUCTION);
+    }
+
+    @Test
+    public void Chrome_AddRemove_XSSIV_Production() {
+        if (runChrome)
+            AddRemove(Browser.CHROME, Rules.XSSIV, Environments.PRODUCTION);
+    }
+
+    @Test
+    public void Chrome_AddRemove_XVIN_Production() {
+        if (runChrome)
+            AddRemove(Browser.CHROME, Rules.XVIN, Environments.PRODUCTION);
+    }
+
     public void DiscardChanges (Browser browser) {
         VerboseMessages("DiscardChanges " + browser);
         WebDriver driver = BrowserFactory(browser);
@@ -174,17 +210,78 @@ public class TestCases {
 
     public void CreateChanges (WebDriver driver, int changes) {
         WebElement inputRule = Locate(driver, LocateType.ID, "input-rule", "input-rule");
+        int ruleNumber = 1;
+        int envNumber = 1;
+        String ruleValueToEnter = "";
+
+        // Set the Header field
+        Select ruleSelect = new Select(driver.findElement(By.id("input-header")));
         for (int i = 0; i < changes; i++) {
-            // Clear existing value
+            switch (ruleNumber)
+            {
+                case 1:
+                    ruleValueToEnter = "user-agent " + i;
+                    ruleSelect.selectByVisibleText("USER-AGENT");
+                    ruleNumber++;
+                    break;
+                case 2:
+                    ruleValueToEnter = "x-car-model " + i;
+                    ruleSelect.selectByVisibleText("X-CAR-MODEL");
+                    ruleNumber++;
+                    break;
+                case 3:
+                    ruleValueToEnter = "x-market " + i;
+                    ruleSelect.selectByVisibleText("X-MARKET");
+                    ruleNumber++;
+                    break;
+                case 4:
+                    ruleValueToEnter = "x-ntg-version " + i;
+                    ruleSelect.selectByVisibleText("X-NTG-VERSION");
+                    ruleNumber++;
+                    break;
+                case 5:
+                    ruleValueToEnter = "x-ssiv " + i;
+                    ruleSelect.selectByVisibleText("X-SSIV");
+                    ruleNumber++;
+                    break;
+                case 6:
+                    ruleValueToEnter = Integer.toString(i);
+                    while (ruleValueToEnter.length() < 17)
+                        ruleValueToEnter = ruleValueToEnter + "0";
+                    ruleSelect.selectByVisibleText("X-VIN");
+                    ruleNumber = 1;
+                    break;
+            }
+
+            // Set the Rule field
+            inputRule = Locate(driver, LocateType.ID, "input-rule", "input-rule");
             inputRule.clear();
             Sleep(NormalSleepTime);
-            // Enter a value in Rule
-            inputRule.sendKeys(Integer.toString(i));
+            inputRule.sendKeys(ruleValueToEnter);
             Sleep(NormalSleepTime);
+
+            // Set the Target field
+            Select targetSelect = new Select(driver.findElement(By.id("input-target")));
+            switch(envNumber) {
+                case 1:
+                    targetSelect.selectByVisibleText("Development");
+                    envNumber++;
+                    break;
+                case 2:
+                    targetSelect.selectByVisibleText("Test");
+                    envNumber++;
+                    break;
+                case 3:
+                    targetSelect.selectByVisibleText("Production");
+                    envNumber = 1;
+                    break;
+            }
+
             // Click the Commit field
             WebElement commitField = Locate(driver, LocateType.ID, "btn-add-rule", "btn-add-rule");
             commitField.click();
             Sleep(NormalSleepTime);
+
         }
 
         // TODO get verification working
@@ -236,7 +333,6 @@ public class TestCases {
 
         // Set the Header field
         Select ruleSelect = new Select(driver.findElement(By.id("input-header")));
-        Sleep(NormalSleepTime);
         switch (rule)
         {
             case USERAGENT:
@@ -334,17 +430,23 @@ public class TestCases {
         WebElement existingRule = null;
         WebElement saveButton = null;
         int countDeleted = 0;
+        boolean ruleFound = false;
         while (1 > -1) {
             try {
-                existingRule = CheckExists(driver, LocateType.ID, "btn-remove-0", "Remove Button 0");
+                existingRule = CheckExists(driver, LocateType.ID, "btn-remove-" + countDeleted, "Remove Button 0");
                 existingRule.click();
-                saveButton = Locate(driver, LocateType.ID, "btn-save", "Save Button");
-                saveButton.click();
-                Sleep(SleepForSave);
+                Sleep(100);
+                countDeleted++;
+                ruleFound = true;
             } catch (Exception ex) {
                 VerboseMessages("    " + countDeleted + " rules deleted");
-                return;
+                break;
             }
+        }
+        if (ruleFound) {
+            saveButton = Locate(driver, LocateType.ID, "btn-save", "Save Button");
+            saveButton.click();
+            Sleep(SleepForSave);
         }
     }
 
