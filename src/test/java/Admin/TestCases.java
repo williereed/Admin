@@ -17,7 +17,7 @@ import static org.junit.Assert.assertNotSame;
 
 public class TestCases {
     //private String AdminURL = "https://52.151.17.83/admin/";
-    private String AdminURL = "https://localhost:8081";
+    private String AdminURL = "https://localhost/admin";
     private boolean verboseMessages = false;        // true will write each action to the console
     private int secondsToTimeout = 5;
     private int numberRetriesFindElement = 2;
